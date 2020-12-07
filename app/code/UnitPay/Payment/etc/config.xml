@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <payment>
+            <unitpay_payment>
+                <active>0</active>
+                <model>UnitPay\Payment\Model\Payment</model>
+                <order_status>pending_payment</order_status>
+                <payment_action>authorize_capture</payment_action>
+                <title>UnitPay</title>
+            </unitpay_payment>
+        </payment>
+    </default>
+</config>
