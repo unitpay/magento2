@@ -426,7 +426,7 @@ class Payment extends AbstractMethod
      * @return array
      */
     public function findErrors($params, $sum, $currency) {
-        $this->setPublicKey(false);
+        $this->setProcessSuccess(false);
 
         $order_id = $params['account'];
 
