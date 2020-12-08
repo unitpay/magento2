@@ -74,6 +74,11 @@ class Payment extends AbstractMethod
     /**
      * @var
      */
+    protected $currentMethod;
+
+    /**
+     * @var
+     */
     protected $domain;
     /**
      * @var
