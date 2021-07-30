@@ -329,6 +329,7 @@ class Payment extends AbstractMethod
                 "name" => $item->getName(),
                 "count" => $item->getQtyOrdered(),
                 "price" => $this->priceFormat($item->getPrice()),
+                "sum" => $item->getRowTotal() - $item->getDiscountAmount(),
                 "type" => "commodity",
                 "currency" => $order->getOrderCurrencyCode(),
                 "nds" => $product->getTaxClassId() > 0 ? $this->getTaxRates($item->getData("tax_percent")) : "none",
