@@ -50,14 +50,24 @@ class Callback extends Action
             );
 		} else {
 			$order = $this->order->loadByIncrementId($_GET['params']['account']);
-			
+
+            $order->setState(Order::STATE_PROCESSING);
+            $order->setStatus($order->getConfig()->getStateDefaultStatus(Order::STATE_PROCESSING));
+            $order->save();
+
 			$result = $this->unitpayPayment->validateCallback($order);
 
 			if($this->unitpayPayment->isProcessSuccess()) {
-				$order->setState(Order::STATE_PROCESSING);
-				$order->setStatus($order->getConfig()->getStateDefaultStatus(Order::STATE_PROCESSING));
+				$order->setState(Order::STATE_COMPLETE);
+				$order->setStatus($order->getConfig()->getStateDefaultStatus(Order::STATE_COMPLETE));
 				$order->save();
 			}
+
+            if($this->unitpayPayment->isProcessError()) {
+                $order->setState(Order::STATE_CANCELED);
+                $order->setStatus($order->getConfig()->getStateDefaultStatus(Order::STATE_CANCELED));
+                $order->save();
+            }
 		}
 
         $this->getResponse()->setBody(json_encode($result));

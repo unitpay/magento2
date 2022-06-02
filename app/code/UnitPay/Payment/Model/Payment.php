@@ -60,12 +60,12 @@ class Payment extends AbstractMethod
      * @var OrderManagementInterface
      */
     protected $orderManagement;
-	
+
 	/**
      * @var ProductRepositoryInterface
      */
     protected $productManagement;
-	
+
     /**
      * @var ScopeConfigInterface
      */
@@ -93,6 +93,11 @@ class Payment extends AbstractMethod
      * @var bool
      */
     public $processSuccess = false;
+
+    /**
+     * @var bool
+     */
+    public $processError = false;
 
     /**
      * Payment constructor.
@@ -165,6 +170,22 @@ class Payment extends AbstractMethod
     public function setProcessSuccess($processSuccess)
     {
         $this->processSuccess = $processSuccess;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isProcessError()
+    {
+        return $this->processError;
+    }
+
+    /**
+     * @param bool $processError
+     */
+    public function setProcessError($processError)
+    {
+        $this->processError = $processError;
     }
 
 
@@ -324,7 +345,7 @@ class Payment extends AbstractMethod
 
         foreach ($order->getAllItems() as $item) {
 			$product = $this->productManagement->getById($item->getData("product_id"));
-			
+
             $items[] = [
                 "name" => $item->getName(),
                 "count" => $item->getQtyOrdered(),
@@ -376,6 +397,9 @@ class Payment extends AbstractMethod
      */
     public function validateCallback(Order $order)
     {
+        $this->setProcessSuccess(false);
+        $this->setProcessError(false);
+
         $method = '';
         $params = [];
         $result = [];
@@ -406,14 +430,22 @@ class Payment extends AbstractMethod
 						$this->currentMethod = $method;
 
 						$result = $this->findErrors($params, $this->priceFormat($order->getGrandTotal()), $order->getOrderCurrencyCode());
-					} else {
+
+                        if($method == 'pay' && !isset($result['error'])) {
+                            $this->setProcessSuccess(true);
+                        }
+
+                        if($method == 'error') {
+                            $this->setProcessError(true);
+                        }
+                    } else {
 						$result = array('error' =>
 							array('message' => 'Method not exists')
 						);
 					}
 				}else{
 					$result = array('error' =>
-							array('message' => 'Signature verify error')
+                        array('message' => 'Signature verify error')
 					);
 				}
 			}
@@ -432,8 +464,6 @@ class Payment extends AbstractMethod
      * @return array
      */
     public function findErrors($params, $sum, $currency) {
-        $this->setProcessSuccess(false);
-
         $order_id = $params['account'];
 
         if (is_null($order_id)){
@@ -450,8 +480,6 @@ class Payment extends AbstractMethod
             );
         }
         else{
-            $this->setProcessSuccess(true);
-
             $result = array('result' =>
                 array('message' => 'Success')
             );
